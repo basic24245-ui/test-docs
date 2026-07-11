@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duology — Юридические документы / Legal Documents</title>
+<meta name="description" content="Политика конфиденциальности и Пользовательское соглашение Telegram-бота Duology.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;--cyan:#00f0ff;--purple:#b537f2;--pink:#ff2e93;
+  --text:#e8ecf4;--muted:#9aa3bd;
+  --glass:rgba(20,24,42,0.55);--glass-brd:rgba(120,140,255,0.18);
+  --radius:16px;--maxw:1180px;--readw:820px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Inter','Space Grotesk',system-ui,sans-serif;
+  background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+.bg-gradient{position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(1000px 600px at 12% -10%,rgba(181,55,242,.14),transparent 60%),
+    radial-gradient(900px 700px at 100% 6%,rgba(0,240,255,.10),transparent 55%),
+    linear-gradient(160deg,#070710 0%,#0a0a14 50%,#080812 100%);}
+.grid-overlay{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.18;
+  background-image:linear-gradient(rgba(120,140,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(120,140,255,.06) 1px,transparent 1px);
+  background-size:54px 54px;mask-image:radial-gradient(circle at 50% 20%,#000,transparent 85%);}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+a{color:inherit;text-decoration:none}
+
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:100;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(8,8,16,.6);border-bottom:1px solid rgba(120,140,255,.10);transition:background .3s,box-shadow .3s;}
+header.scrolled{background:rgba(8,8,16,.85);box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:66px}
+.logo{font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.4rem;letter-spacing:2px;color:#fff;
+  text-shadow:0 0 8px rgba(0,240,255,.6),0 0 22px rgba(181,55,242,.5);}
+.logo span{color:var(--cyan)}
+.nav-menu{display:flex;align-items:center;gap:26px}
+.nav-links{display:flex;align-items:center;gap:24px;list-style:none}
+.nav-links a{color:var(--muted);font-weight:500;font-size:.94rem;position:relative;transition:color .2s}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .25s;box-shadow:0 0 8px var(--cyan)}
+.nav-links a:hover{color:#fff}.nav-links a:hover::after{width:100%}
+.nav-right{display:flex;align-items:center;gap:14px}
+.lang-switch{display:flex;border:1px solid var(--glass-brd);border-radius:30px;overflow:hidden;background:rgba(255,255,255,.03)}
+.lang-switch button{background:none;border:none;color:var(--muted);font-family:'Space Grotesk';font-weight:600;padding:6px 13px;cursor:pointer;font-size:.82rem;transition:.2s}
+.lang-switch button.active{color:#04060f;background:linear-gradient(90deg,var(--cyan),var(--purple));box-shadow:0 0 14px rgba(0,240,255,.5)}
+.burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;z-index:120}
+.burger span{width:24px;height:2px;background:var(--cyan);border-radius:2px;transition:.3s;box-shadow:0 0 6px var(--cyan)}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-nav{position:fixed;inset:0;z-index:110;background:rgba(6,6,14,.97);backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+.mobile-nav.open{transform:none}
+.mobile-nav a{font-family:'Orbitron';font-size:1.15rem;color:var(--text)}
+.mobile-nav a:hover{color:var(--cyan)}
+
+/* HERO */
+.hero{padding:120px 0 40px;text-align:center}
+.hero h1{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(1.8rem,5vw,2.8rem);letter-spacing:.5px;margin-bottom:14px;
+  background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero p{color:var(--muted);font-size:1.05rem}
+.hero .updated{display:inline-block;margin-top:18px;font-size:.8rem;color:var(--cyan);border:1px solid rgba(0,240,255,.3);background:rgba(0,240,255,.06);padding:5px 14px;border-radius:30px}
+
+/* LAYOUT */
+.layout{padding:20px 0 90px}
+.doc-wrap{max-width:var(--readw);width:100%;margin:0 auto}
+
+/* TABS */
+.doc-tabs{position:sticky;top:74px;z-index:60;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+  max-width:var(--readw);margin:0 auto 30px;padding:8px;border-radius:40px;
+  background:rgba(10,10,20,.7);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border:1px solid var(--glass-brd);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.tab-btn{flex:1 1 auto;min-width:180px;font-family:'Space Grotesk';font-weight:600;font-size:.95rem;
+  color:var(--muted);background:none;border:none;cursor:pointer;padding:13px 20px;border-radius:32px;transition:.25s;white-space:nowrap}
+.tab-btn:hover{color:#fff}
+.tab-btn.active{color:#04060f;background:linear-gradient(90deg,var(--cyan),var(--purple));
+  box-shadow:0 0 20px rgba(0,240,255,.45);background-size:200% 100%}
+.doc{display:none}
+.doc.active{display:block}
+
+/* DOC card */
+.doc{background:var(--glass);border:1px solid var(--glass-brd);border-radius:var(--radius);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding:44px 46px;margin-bottom:40px;scroll-margin-top:88px}
+.doc-title{font-family:'Orbitron',sans-serif;font-weight:800;font-size:clamp(1.4rem,3.5vw,2rem);margin-bottom:6px;
+  background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+.doc-date{color:var(--muted);font-size:.85rem;font-style:italic;margin-bottom:8px}
+.doc-lead{color:var(--muted);border-bottom:1px solid rgba(120,140,255,.14);padding-bottom:22px;margin-bottom:8px}
+.doc h2{font-family:'Space Grotesk';font-weight:700;font-size:1.18rem;color:#fff;margin:30px 0 12px;padding-left:14px;position:relative}
+.doc h2::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:3px;border-radius:3px;background:linear-gradient(var(--cyan),var(--purple));box-shadow:0 0 10px rgba(0,240,255,.5)}
+.doc h2 .num{color:var(--cyan);font-family:'Orbitron';margin-right:8px;font-size:.95rem}
+.doc p{color:var(--text);opacity:.92;margin:10px 0;font-size:.98rem}
+.doc ul{margin:10px 0 10px 4px;padding:0;list-style:none}
+.doc li{position:relative;padding-left:24px;margin:8px 0;color:var(--text);opacity:.9;font-size:.97rem}
+.doc li::before{content:"";position:absolute;left:4px;top:11px;width:7px;height:7px;border-radius:2px;transform:rotate(45deg);
+  background:linear-gradient(135deg,var(--cyan),var(--pink));box-shadow:0 0 8px rgba(0,240,255,.5)}
+.doc strong{color:#fff;font-weight:600}
+.doc a.inline{color:var(--cyan);border-bottom:1px dashed rgba(0,240,255,.5)}
+.doc a.inline:hover{color:var(--pink);border-bottom-color:var(--pink)}
+.contact-chip{display:inline-flex;align-items:center;gap:8px;margin-top:6px;padding:8px 16px;border-radius:12px;
+  background:rgba(0,240,255,.08);border:1px solid rgba(0,240,255,.28);color:#fff;font-weight:600;box-shadow:0 0 16px rgba(0,240,255,.15)}
+.doc-placeholder{border:1px dashed rgba(181,55,242,.5);border-radius:12px;padding:26px;text-align:center;color:var(--muted);background:rgba(181,55,242,.05)}
+.back-top{display:inline-flex;align-items:center;gap:6px;margin-top:14px;color:var(--cyan);font-size:.85rem}
+.back-top:hover{color:#fff}
+
+/* language toggle blocks */
+[data-lang-block]{display:none}
+[data-lang-block].active{display:block}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.visible{opacity:1;transform:none}
+
+/* FOOTER */
+footer{border-top:1px solid rgba(120,140,255,.12);padding:44px 0 30px;background:rgba(6,6,12,.6)}
+.footer-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:24px;margin-bottom:26px}
+.footer-brand .logo{font-size:1.3rem;display:inline-block;margin-bottom:10px}
+.footer-brand p{color:var(--muted);font-size:.88rem;max-width:280px}
+.footer-links{display:flex;flex-direction:column;gap:9px}
+.footer-links a{color:var(--muted);font-size:.92rem;transition:color .2s}
+.footer-links a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(120,140,255,.1);padding-top:20px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;color:var(--muted);font-size:.84rem}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;gap:18px}
+  .side-toc{display:none}
+  .doc{padding:32px 26px}
+}
+@media(max-width:820px){
+  .nav-links{display:none}.burger{display:flex}
+}
+@media(max-width:480px){
+  .doc{padding:26px 20px}
+  .hero{padding:104px 0 24px}
+}
+</style>
+</head>
+<body>
+<div class="bg-gradient"></div>
+<div class="grid-overlay"></div>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="container nav">
+    <a class="logo" href="https://duologylawyerai.com" target="_blank" rel="noopener">Duo<span>logy</span></a>
+    <div class="nav-menu">
+      <ul class="nav-links">
+        <li><a href="https://duologylawyerai.com" target="_blank" rel="noopener" data-ru="Главная" data-en="Home">Главная</a></li>
+        <li><a href="#privacy" data-ru="Конфиденциальность" data-en="Privacy">Конфиденциальность</a></li>
+        <li><a href="#terms" data-ru="Соглашение" data-en="Terms">Соглашение</a></li>
+      </ul>
+      <div class="nav-right">
+        <div class="lang-switch">
+          <button id="lng-ru" class="active" onclick="setLang('ru')">RU</button>
+          <button id="lng-en" onclick="setLang('en')">EN</button>
+        </div>
+        <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="https://duologylawyerai.com" target="_blank" rel="noopener" data-ru="Главная" data-en="Home">Главная</a>
+  <a href="#privacy" data-ru="Конфиденциальность" data-en="Privacy">Конфиденциальность</a>
+  <a href="#terms" data-ru="Соглашение" data-en="Terms">Соглашение</a>
+  <div class="lang-switch" style="display:flex">
+    <button class="active" id="m-lng-ru" onclick="setLang('ru')">RU</button>
+    <button id="m-lng-en" onclick="setLang('en')">EN</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <h1 data-ru="Юридические документы" data-en="Legal Documents">Юридические документы</h1>
+    <p data-ru="Конфиденциальность и условия использования" data-en="Privacy Policy and Terms of Service">Конфиденциальность и условия использования</p>
+    <span class="updated" data-ru="Обновлено: 11.07.2026" data-en="Updated: 11.07.2026">Обновлено: 11.07.2026</span>
+  </div>
+</section>
+
+<div class="container layout">
+  <!-- TABS -->
+  <div class="doc-tabs" id="docTabs">
+    <button class="tab-btn active" data-target="privacy" onclick="showDoc('privacy')" data-ru="Конфиденциальность" data-en="Privacy Policy">Конфиденциальность</button>
+    <button class="tab-btn" data-target="terms" onclick="showDoc('terms')" data-ru="Условия использования" data-en="Terms of Service">Условия использования</button>
+  </div>
+
+  <div class="doc-wrap">
+    <!-- ================= PRIVACY ================= -->
+    <article class="doc reveal visible active" id="privacy">
+      <h2 class="doc-title" style="padding:0" data-ru="Политика конфиденциальности" data-en="Privacy Policy">Политика конфиденциальности</h2>
+      <p class="doc-date" data-ru="Дата последнего обновления: 11.07.2026" data-en="Last updated: 11.07.2026">Дата последнего обновления: 11.07.2026</p>
+
+      <!-- RU -->
+      <div data-lang-block="ru" class="active">
+        <p class="doc-lead">Настоящая Политика описывает, какие данные обрабатывает Telegram-бот <strong>Duology</strong> (далее — «Сервис»), с какой целью и как вы можете этими данными управлять. Пользуясь Сервисом, вы соглашаетесь с настоящей Политикой.</p>
+        <h2><span class="num">1.</span>Какие данные мы обрабатываем</h2>
+        <ul>
+          <li><strong>Данные Telegram:</strong> ваш числовой Telegram ID и username (если он задан).</li>
+          <li><strong>Загружаемые вами фотографии</strong> — для выполнения генерации/редактирования изображения.</li>
+          <li><strong>Текст запросов (промптов)</strong>, которые вы вводите.</li>
+          <li><strong>История операций:</strong> количество и параметры генераций, баланс, покупки и платежи (без реквизитов банковских карт).</li>
+        </ul>
+        <p>Мы не запрашиваем ваши ФИО, адрес, телефон или иные документы.</p>
+        <h2><span class="num">2.</span>Цели обработки</h2>
+        <p>Данные используются исключительно для работы Сервиса:</p>
+        <ul>
+          <li>создание и доставка вам результата генерации;</li>
+          <li>учёт баланса, пакетов, подписок и лимитов;</li>
+          <li>защита от злоупотреблений (мошенничество, мультиаккаунты);</li>
+          <li>поддержка пользователей.</li>
+        </ul>
+        <h2><span class="num">3.</span>Обработка фотографий и согласие</h2>
+        <p>Загружая фотографию, вы <strong>даёте согласие</strong> на её обработку для создания запрошенного вами изображения.</p>
+        <p>Важно:</p>
+        <ul>
+          <li>Мы <strong>не создаём базу лиц</strong>, не идентифицируем вас по лицу и <strong>не сохраняем биометрические шаблоны (эмбеддинги)</strong>.</li>
+          <li>Фотография используется <strong>только</strong> для конкретной вашей генерации.</li>
+          <li><strong>Исходное фото удаляется сразу после обработки.</strong> В качестве резервного механизма действует автоматическая очистка.</li>
+          <li>Мы сохраняем только технический «отпечаток» изображения (хэш) — короткую строку, по которой <strong>невозможно восстановить само фото</strong>. Он нужен только для защиты от повторных злоупотреблений.</li>
+        </ul>
+        <p>Загружайте только своё фото или фото, на использование которого у вас есть согласие изображённого человека.</p>
+        <h2><span class="num">4.</span>Передача данных третьим лицам</h2>
+        <p>Для самой генерации изображения ваше <strong>фото и промпт передаются стороннему AI-сервису-обработчику</strong>, инфраструктура которого (включая сервисы Google) расположена за пределами России. Это необходимая часть работы Сервиса — без этого генерация невозможна. Загружая фото, вы соглашаетесь на такую передачу.</p>
+        <p>Мы <strong>не продаём</strong> ваши данные и <strong>не передаём</strong> их иным третьим лицам в рекламных или иных целях.</p>
+        <h2><span class="num">5.</span>Платежи</h2>
+        <p>Оплата проходит через Telegram Stars и (при подключении) платёжный сервис для карт/СБП. <strong>Реквизиты ваших карт мы не получаем и не храним</strong> — их обрабатывает платёжная система.</p>
+        <h2><span class="num">6.</span>Где обрабатываются данные</h2>
+        <p>Серверная инфраструктура Сервиса расположена за пределами России (Европа), обработка изображений выполняется сторонним AI-сервисом за рубежом. Данные передаются по защищённым (зашифрованным) каналам.</p>
+        <h2><span class="num">7.</span>Сроки хранения</h2>
+        <ul>
+          <li><strong>Исходные фото</strong> — удаляются сразу после обработки (резервная очистка — в короткий срок).</li>
+          <li><strong>Технический хэш, история операций и платежей</strong> — хранятся, пока это необходимо для работы Сервиса, учёта и защиты от злоупотреблений.</li>
+          <li><strong>Учётные данные</strong> (Telegram ID, username) — пока вы пользуетесь Сервисом.</li>
+        </ul>
+        <h2><span class="num">8.</span>Ваши права</h2>
+        <p>Вы можете:</p>
+        <ul>
+          <li>запросить удаление своих данных;</li>
+          <li>отозвать согласие на обработку (это означает прекращение пользования Сервисом);</li>
+          <li>задать вопрос о своих данных.</li>
+        </ul>
+        <p>Для этого напишите в поддержку: <strong>@DuologySupport</strong>. Мы обработаем запрос в разумный срок.</p>
+        <h2><span class="num">9.</span>Безопасность</h2>
+        <p>Мы принимаем разумные технические меры: шифрование каналов передачи, ограничение доступа к данным, автоматическое удаление исходных фото.</p>
+        <h2><span class="num">10.</span>Возраст</h2>
+        <p>Сервис предназначен для лиц <strong>18 лет и старше</strong>.</p>
+        <h2><span class="num">11.</span>Изменения</h2>
+        <p>Мы можем обновлять настоящую Политику. Актуальная версия всегда доступна в боте по команде /privacy.</p>
+        <h2><span class="num">12.</span>Контакты</h2>
+        <p>По любым вопросам о данных и конфиденциальности:</p>
+        <a class="contact-chip" href="https://t.me/DuologySupport" target="_blank" rel="noopener">✉️ @DuologySupport</a>
+      </div>
+
+      <!-- EN -->
+      <div data-lang-block="en">
+        <p class="doc-lead">This Policy describes what data the <strong>Duology</strong> Telegram bot (the "Service") processes, for what purpose, and how you can manage that data. By using the Service, you agree to this Policy.</p>
+        <h2><span class="num">1.</span>What data we process</h2>
+        <ul>
+          <li><strong>Telegram data:</strong> your numeric Telegram ID and username (if set).</li>
+          <li><strong>Photos you upload</strong> — to perform image generation/editing.</li>
+          <li><strong>Prompt text</strong> that you enter.</li>
+          <li><strong>Operation history:</strong> the number and parameters of generations, balance, purchases and payments (without bank card details).</li>
+        </ul>
+        <p>We do not ask for your full name, address, phone number or any documents.</p>
+        <h2><span class="num">2.</span>Purposes of processing</h2>
+        <p>Data is used solely to operate the Service:</p>
+        <ul>
+          <li>creating and delivering your generation result;</li>
+          <li>tracking balance, bundles, subscriptions and limits;</li>
+          <li>protection against abuse (fraud, multi-accounts);</li>
+          <li>user support.</li>
+        </ul>
+        <h2><span class="num">3.</span>Photo processing and consent</h2>
+        <p>By uploading a photo, you <strong>give your consent</strong> to process it in order to create the image you requested.</p>
+        <p>Important:</p>
+        <ul>
+          <li>We <strong>do not build a face database</strong>, do not identify you by your face, and <strong>do not store biometric templates (embeddings)</strong>.</li>
+          <li>The photo is used <strong>only</strong> for your specific generation.</li>
+          <li><strong>The source photo is deleted immediately after processing.</strong> An automatic cleanup serves as a backup mechanism.</li>
+          <li>We keep only a technical "fingerprint" of the image (a hash) — a short string from which <strong>the photo itself cannot be reconstructed</strong>. It is used only to protect against repeated abuse.</li>
+        </ul>
+        <p>Only upload your own photo, or a photo you have the depicted person's consent to use.</p>
+        <h2><span class="num">4.</span>Sharing data with third parties</h2>
+        <p>For the image generation itself, your <strong>photo and prompt are transferred to a third-party AI processing service</strong> whose infrastructure (including Google services) is located outside Russia. This is a necessary part of the Service — generation is impossible without it. By uploading a photo, you consent to such transfer.</p>
+        <p>We <strong>do not sell</strong> your data and <strong>do not share</strong> it with any other third parties for advertising or other purposes.</p>
+        <h2><span class="num">5.</span>Payments</h2>
+        <p>Payment is made via Telegram Stars and (when enabled) a payment service for cards/SBP. <strong>We do not receive or store your card details</strong> — they are handled by the payment system.</p>
+        <h2><span class="num">6.</span>Where data is processed</h2>
+        <p>The Service's server infrastructure is located outside Russia (Europe), and image processing is performed by a third-party AI service abroad. Data is transmitted over secure (encrypted) channels.</p>
+        <h2><span class="num">7.</span>Retention periods</h2>
+        <ul>
+          <li><strong>Source photos</strong> — deleted immediately after processing (backup cleanup within a short time).</li>
+          <li><strong>Technical hash, operation and payment history</strong> — stored as long as necessary to operate the Service, keep records and protect against abuse.</li>
+          <li><strong>Account data</strong> (Telegram ID, username) — while you use the Service.</li>
+        </ul>
+        <h2><span class="num">8.</span>Your rights</h2>
+        <p>You may:</p>
+        <ul>
+          <li>request deletion of your data;</li>
+          <li>withdraw consent to processing (this means ceasing to use the Service);</li>
+          <li>ask a question about your data.</li>
+        </ul>
+        <p>To do so, message support: <strong>@DuologySupport</strong>. We will process the request within a reasonable time.</p>
+        <h2><span class="num">9.</span>Security</h2>
+        <p>We take reasonable technical measures: encryption of transmission channels, restricted access to data, and automatic deletion of source photos.</p>
+        <h2><span class="num">10.</span>Age</h2>
+        <p>The Service is intended for persons <strong>18 years and older</strong>.</p>
+        <h2><span class="num">11.</span>Changes</h2>
+        <p>We may update this Policy. The current version is always available in the bot via the /privacy command.</p>
+        <h2><span class="num">12.</span>Contacts</h2>
+        <p>For any questions about data and privacy:</p>
+        <a class="contact-chip" href="https://t.me/DuologySupport" target="_blank" rel="noopener">✉️ @DuologySupport</a>
+      </div>
+      <a class="back-top" href="#header" data-ru="↑ Наверх" data-en="↑ Back to top">↑ Наверх</a>
+    </article>
+
+    <!-- ================= TERMS ================= -->
+    <article class="doc reveal" id="terms">
+      <h2 class="doc-title" style="padding:0" data-ru="Пользовательское соглашение" data-en="Terms of Service">Пользовательское соглашение</h2>
+      <p class="doc-date" data-ru="Дата последнего обновления: 11.07.2026" data-en="Last updated: 11.07.2026">Дата последнего обновления: 11.07.2026</p>
+
+      <!-- RU -->
+      <div data-lang-block="ru" class="active">
+        <p class="doc-lead">Настоящее Соглашение регулирует использование Telegram-бота <strong>Duology</strong> (далее — «Сервис»). Начиная пользоваться Сервисом, вы подтверждаете, что ознакомились с Соглашением и принимаете его.</p>
+        <h2><span class="num">1.</span>Предмет</h2>
+        <p>Сервис предоставляет возможность создавать и редактировать изображения с помощью технологий искусственного интеллекта: вы загружаете фотографию и текстовое описание (промпт) и получаете сгенерированный результат.</p>
+        <h2><span class="num">2.</span>Возраст</h2>
+        <p>Использование Сервиса разрешено лицам <strong>18 лет и старше</strong>.</p>
+        <h2><span class="num">3.</span>Доступ</h2>
+        <p>Доступ осуществляется через ваш аккаунт в Telegram. Вы отвечаете за действия, совершённые под вашим аккаунтом.</p>
+        <h2><span class="num">4.</span>Правила использования</h2>
+        <p>Запрещено использовать Сервис для создания или загрузки:</p>
+        <ul>
+          <li>материалов сексуального характера, эротики, порнографии;</li>
+          <li>изображений, унижающих достоинство, разжигающих ненависть, экстремистских;</li>
+          <li>изображений насилия, шок-контента;</li>
+          <li>изображений реальных/известных людей без их согласия, а также в целях выдачи себя за другое лицо, обмана или клеветы;</li>
+          <li>любого контента, нарушающего законодательство.</li>
+        </ul>
+        <p>Вы обязуетесь загружать только собственные фотографии либо фотографии, на использование которых у вас есть согласие изображённого человека.</p>
+        <h2><span class="num">5.</span>Ответственность пользователя</h2>
+        <ul>
+          <li>Вы несёте полную ответственность за загружаемые фотографии, вводимые промпты и за то, как используете полученный результат.</li>
+          <li>Вы подтверждаете, что обладаете необходимыми правами и согласиями на используемые изображения.</li>
+        </ul>
+        <h2><span class="num">6.</span>Оплата и списание</h2>
+        <ul>
+          <li>Стоимость услуг указана в Сервисе. Оплата — через Telegram Stars и (при подключении) карты/СБП.</li>
+          <li>Списание происходит за каждую генерацию, а также при покупке пакетов/подписок согласно выбранному тарифу.</li>
+          <li>Отмена запущенной генерации невозможна.</li>
+          <li>Результат генерации зависит от качества исходного фото и промпта; Сервис не гарантирует конкретный художественный результат.</li>
+        </ul>
+        <h2><span class="num">7.</span>Возвраты</h2>
+        <ul>
+          <li>При техническом сбое, когда результат не был получен, средства/генерация возвращаются автоматически.</li>
+          <li>Количество автоматических возвратов на пользователя может быть ограничено (защита от злоупотреблений). Спорные ситуации решаются через поддержку.</li>
+        </ul>
+        <h2><span class="num">8.</span>Ограничение доступа</h2>
+        <p>Мы вправе ограничить или прекратить ваш доступ к Сервису при нарушении настоящего Соглашения, мошенничестве, злоупотреблениях (в т.ч. мультиаккаунтах и обходе лимитов).</p>
+        <h2><span class="num">9.</span>Отказ от гарантий</h2>
+        <p>Сервис предоставляется «как есть». Мы не гарантируем бесперебойную работу, а также соответствие результата вашим ожиданиям. Технологии ИИ могут выдавать неточные или неожиданные результаты.</p>
+        <h2><span class="num">10.</span>Ограничение ответственности</h2>
+        <p>Мы не несём ответственности за косвенные убытки, а также за последствия использования вами полученных изображений с нарушением закона или прав третьих лиц.</p>
+        <h2><span class="num">11.</span>Конфиденциальность</h2>
+        <p>Обработка ваших данных описана в отдельном документе — <a class="inline" href="#privacy">Политике конфиденциальности</a> (в боте — команда /privacy).</p>
+        <h2><span class="num">12.</span>Изменения</h2>
+        <p>Мы можем изменять настоящее Соглашение. Актуальная версия доступна в боте по команде /terms. Продолжая пользоваться Сервисом, вы принимаете изменения.</p>
+        <h2><span class="num">13.</span>Контакты</h2>
+        <p>Поддержка и любые вопросы:</p>
+        <a class="contact-chip" href="https://t.me/DuologySupport" target="_blank" rel="noopener">✉️ @DuologySupport</a>
+      </div>
+
+      <!-- EN -->
+      <div data-lang-block="en">
+        <p class="doc-lead">These Terms govern the use of the <strong>Duology</strong> Telegram bot (the "Service"). By starting to use the Service, you confirm that you have read these Terms and accept them.</p>
+        <h2><span class="num">1.</span>Subject</h2>
+        <p>The Service lets you create and edit images using artificial intelligence: you upload a photo and a text description (prompt) and receive a generated result.</p>
+        <h2><span class="num">2.</span>Age</h2>
+        <p>Use of the Service is permitted to persons <strong>18 years and older</strong>.</p>
+        <h2><span class="num">3.</span>Access</h2>
+        <p>Access is provided through your Telegram account. You are responsible for actions taken under your account.</p>
+        <h2><span class="num">4.</span>Rules of use</h2>
+        <p>It is prohibited to use the Service to create or upload:</p>
+        <ul>
+          <li>sexual content, erotica, pornography;</li>
+          <li>images that degrade dignity, incite hatred, or are extremist;</li>
+          <li>images of violence or shock content;</li>
+          <li>images of real/famous people without their consent, or for impersonation, deception or defamation;</li>
+          <li>any content that violates the law.</li>
+        </ul>
+        <p>You undertake to upload only your own photos, or photos you have the depicted person's consent to use.</p>
+        <h2><span class="num">5.</span>User responsibility</h2>
+        <ul>
+          <li>You bear full responsibility for the photos you upload, the prompts you enter, and how you use the result.</li>
+          <li>You confirm that you hold the necessary rights and consents for the images used.</li>
+        </ul>
+        <h2><span class="num">6.</span>Payment and charging</h2>
+        <ul>
+          <li>The cost of services is stated in the Service. Payment is via Telegram Stars and (when enabled) cards/SBP.</li>
+          <li>Charges apply per generation, as well as for purchases of bundles/subscriptions according to the selected plan.</li>
+          <li>A generation that has started cannot be cancelled.</li>
+          <li>The generation result depends on the quality of the source photo and prompt; the Service does not guarantee a specific artistic result.</li>
+        </ul>
+        <h2><span class="num">7.</span>Refunds</h2>
+        <ul>
+          <li>In case of a technical failure where no result was produced, funds/generation are refunded automatically.</li>
+          <li>The number of automatic refunds per user may be limited (protection against abuse). Disputes are resolved through support.</li>
+        </ul>
+        <h2><span class="num">8.</span>Access restriction</h2>
+        <p>We may restrict or terminate your access to the Service in case of violation of these Terms, fraud, or abuse (including multi-accounts and circumventing limits).</p>
+        <h2><span class="num">9.</span>Disclaimer of warranties</h2>
+        <p>The Service is provided "as is". We do not guarantee uninterrupted operation or that the result will meet your expectations. AI technologies may produce inaccurate or unexpected results.</p>
+        <h2><span class="num">10.</span>Limitation of liability</h2>
+        <p>We are not liable for indirect damages, nor for the consequences of your use of the resulting images in violation of the law or third-party rights.</p>
+        <h2><span class="num">11.</span>Privacy</h2>
+        <p>The processing of your data is described in a separate document — the <a class="inline" href="#privacy">Privacy Policy</a> (in the bot — the /privacy command).</p>
+        <h2><span class="num">12.</span>Changes</h2>
+        <p>We may change these Terms. The current version is available in the bot via the /terms command. By continuing to use the Service, you accept the changes.</p>
+        <h2><span class="num">13.</span>Contacts</h2>
+        <p>Support and any questions:</p>
+        <a class="contact-chip" href="https://t.me/DuologySupport" target="_blank" rel="noopener">✉️ @DuologySupport</a>
+      </div>
+      <a class="back-top" href="#header" data-ru="↑ Наверх" data-en="↑ Back to top">↑ Наверх</a>
+    </article>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="logo" href="https://duologylawyerai.com" target="_blank" rel="noopener">Duo<span>logy</span></a>
+        <p data-ru="ИИ-генерация и редактирование изображений в Telegram. Модель Nano Banana 2." data-en="AI image generation and editing in Telegram. Powered by Nano Banana 2.">ИИ-генерация и редактирование изображений в Telegram. Модель Nano Banana 2.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://duologylawyerai.com" target="_blank" rel="noopener" data-ru="Главная страница" data-en="Home page">Главная страница</a>
+        <a href="https://t.me/Duology_Bot" target="_blank" rel="noopener">Telegram · @Duology_Bot</a>
+        <a href="https://t.me/DuologySupport" target="_blank" rel="noopener" data-ru="Поддержка · @DuologySupport" data-en="Support · @DuologySupport">Поддержка · @DuologySupport</a>
+        <a href="#privacy" data-ru="Политика конфиденциальности" data-en="Privacy Policy">Политика конфиденциальности</a>
+        <a href="#terms" data-ru="Пользовательское соглашение" data-en="Terms of Service">Пользовательское соглашение</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Duology</span>
+      <span data-ru="Работает на Nano Banana 2" data-en="Powered by Nano Banana 2">Работает на Nano Banana 2</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ---------- language ---------- */
+function setLang(lang){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-ru]').forEach(el=>{
+    const v=el.getAttribute('data-'+lang);
+    if(v!==null) el.textContent=v;
+  });
+  document.querySelectorAll('[data-lang-block]').forEach(el=>{
+    el.classList.toggle('active',el.getAttribute('data-lang-block')===lang);
+  });
+  ['lng','m-lng'].forEach(p=>{
+    const r=document.getElementById(p+'-ru'),e=document.getElementById(p+'-en');
+    if(r)r.classList.toggle('active',lang==='ru');
+    if(e)e.classList.toggle('active',lang==='en');
+  });
+  try{localStorage.setItem('duology-lang',lang)}catch(e){}
+}
+(function(){
+  let saved='ru';
+  try{saved=localStorage.getItem('duology-lang')||'ru'}catch(e){}
+  if(saved==='en') setLang('en');
+})();
+
+/* ---------- header shadow ---------- */
+const header=document.getElementById('header');
+addEventListener('scroll',()=>header.classList.toggle('scrolled',scrollY>20));
+
+/* ---------- burger ---------- */
+const burger=document.getElementById('burger'),mobileNav=document.getElementById('mobileNav');
+burger.addEventListener('click',()=>{
+  const open=mobileNav.classList.toggle('open');
+  burger.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+});
+mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+  mobileNav.classList.remove('open');burger.classList.remove('open');document.body.style.overflow='';
+}));
+
+/* ---------- document tabs ---------- */
+function showDoc(id,scroll){
+  document.querySelectorAll('.doc').forEach(d=>{
+    const on=d.id===id;
+    d.classList.toggle('active',on);
+    if(on)d.classList.add('visible');
+  });
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('data-target')===id));
+  if(history.replaceState)history.replaceState(null,'','#'+id);
+  if(scroll){const t=document.getElementById('docTabs');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+// open correct tab from URL hash
+(function(){const h=location.hash.replace('#','');if(h==='terms'||h==='privacy')showDoc(h);})();
+
+/* ---------- anchor links: switch tab if targeting a doc ---------- */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const id=a.getAttribute('href').slice(1);
+    if(id==='privacy'||id==='terms'){e.preventDefault();showDoc(id,true);}
+    else if(id==='header'){e.preventDefault();scrollTo({top:0,behavior:'smooth'});}
+  });
+});
+
+/* ---------- reveal ---------- */
+const io=new IntersectionObserver((ents)=>{
+  ents.forEach(en=>{if(en.isIntersecting){en.target.classList.add('visible');io.unobserve(en.target);}});
+},{threshold:0.06});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

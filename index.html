@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Duology — AI генерация изображений в Telegram / AI image generation in Telegram</title>
+<meta name="description" content="Duology — Telegram-бот для генерации и редактирования изображений на модели Nano Banana 2. Создавай образы с помощью ИИ за 30 секунд.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0f;
+  --bg2:#0d0f1c;
+  --cyan:#00f0ff;
+  --purple:#b537f2;
+  --pink:#ff2e93;
+  --text:#e8ecf4;
+  --muted:#9aa3bd;
+  --glass:rgba(20,24,42,0.55);
+  --glass-brd:rgba(120,140,255,0.18);
+  --radius:18px;
+  --maxw:1180px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Space Grotesk','Inter',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* animated background */
+#bg-canvas{position:fixed;inset:0;z-index:-2;display:block}
+.bg-gradient{
+  position:fixed;inset:0;z-index:-3;
+  background:
+    radial-gradient(1200px 700px at 15% -10%, rgba(181,55,242,0.16), transparent 60%),
+    radial-gradient(1000px 800px at 100% 10%, rgba(0,240,255,0.12), transparent 55%),
+    radial-gradient(900px 700px at 50% 120%, rgba(255,46,147,0.10), transparent 60%),
+    linear-gradient(160deg,#070710 0%,#0a0a14 45%,#080812 100%);
+}
+.grid-overlay{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.25;
+  background-image:
+    linear-gradient(rgba(120,140,255,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,140,255,.06) 1px,transparent 1px);
+  background-size:54px 54px;
+  mask-image:radial-gradient(circle at 50% 30%,#000 0%,transparent 85%);
+}
+.container{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+a{color:inherit;text-decoration:none}
+section{position:relative;padding:96px 0;scroll-margin-top:80px}
+.section-title{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(1.7rem,4.5vw,2.7rem);
+  font-weight:800;letter-spacing:.5px;text-align:center;margin-bottom:14px;
+  background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.section-sub{text-align:center;color:var(--muted);max-width:640px;margin:0 auto 54px;font-size:1.02rem}
+
+/* ---------- HEADER ---------- */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(8,8,16,0.55);
+  border-bottom:1px solid rgba(120,140,255,0.10);
+  transition:background .3s,box-shadow .3s;
+}
+header.scrolled{background:rgba(8,8,16,0.82);box-shadow:0 8px 40px rgba(0,0,0,.5)}
+.nav{display:flex;align-items:center;justify-content:space-between;height:70px}
+.logo{
+  font-family:'Orbitron',sans-serif;font-weight:900;font-size:1.5rem;letter-spacing:2px;
+  color:#fff;position:relative;cursor:pointer;
+  text-shadow:0 0 8px rgba(0,240,255,.6),0 0 22px rgba(181,55,242,.5);
+}
+.logo span{color:var(--cyan)}
+.logo::before,.logo::after{
+  content:attr(data-text);position:absolute;top:0;left:0;width:100%;
+  opacity:0;pointer-events:none;
+}
+.logo:hover::before{opacity:.85;color:var(--pink);animation:glitch1 .5s steps(2) infinite}
+.logo:hover::after{opacity:.85;color:var(--cyan);animation:glitch2 .5s steps(2) infinite}
+@keyframes glitch1{0%{transform:translate(0)}25%{transform:translate(-2px,1px)}50%{transform:translate(2px,-1px)}75%{transform:translate(-1px,-2px)}100%{transform:translate(0)}}
+@keyframes glitch2{0%{transform:translate(0)}25%{transform:translate(2px,-1px)}50%{transform:translate(-2px,1px)}75%{transform:translate(1px,2px)}100%{transform:translate(0)}}
+
+.nav-menu{display:flex;align-items:center;gap:28px}
+.nav-links{display:flex;align-items:center;gap:26px;list-style:none}
+.nav-links a{color:var(--muted);font-weight:500;font-size:.95rem;position:relative;transition:color .2s}
+.nav-links a::after{content:"";position:absolute;left:0;bottom:-6px;width:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--purple));transition:width .25s;box-shadow:0 0 8px var(--cyan)}
+.nav-links a:hover{color:#fff}
+.nav-links a:hover::after{width:100%}
+
+.nav-right{display:flex;align-items:center;gap:16px}
+.lang-switch{display:flex;border:1px solid var(--glass-brd);border-radius:30px;overflow:hidden;background:rgba(255,255,255,.03)}
+.lang-switch button{
+  background:none;border:none;color:var(--muted);font-family:'Space Grotesk';font-weight:600;
+  padding:6px 13px;cursor:pointer;font-size:.82rem;transition:.2s;
+}
+.lang-switch button.active{color:#04060f;background:linear-gradient(90deg,var(--cyan),var(--purple));box-shadow:0 0 14px rgba(0,240,255,.5)}
+
+.btn-bot{
+  font-family:'Orbitron',sans-serif;font-weight:700;font-size:.85rem;letter-spacing:1px;
+  color:#04060f;padding:9px 22px;border-radius:30px;
+  background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));
+  box-shadow:0 0 18px rgba(0,240,255,.45),0 0 30px rgba(181,55,242,.35);
+  transition:transform .2s,box-shadow .2s;position:relative;
+  background-size:200% 100%;animation:shift 4s linear infinite;
+}
+@keyframes shift{to{background-position:200% 0}}
+.btn-bot:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 0 26px rgba(0,240,255,.7),0 0 46px rgba(181,55,242,.55)}
+
+.burger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:6px;z-index:120}
+.burger span{width:26px;height:2px;background:var(--cyan);border-radius:2px;transition:.3s;box-shadow:0 0 6px var(--cyan)}
+.burger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.burger.open span:nth-child(2){opacity:0}
+.burger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ---------- HERO ---------- */
+.hero{min-height:100vh;display:flex;align-items:center;padding-top:110px;padding-bottom:60px}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center;width:100%}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;font-size:.8rem;font-weight:600;
+  color:var(--cyan);border:1px solid rgba(0,240,255,.3);background:rgba(0,240,255,.06);
+  padding:6px 15px;border-radius:30px;margin-bottom:22px;letter-spacing:.5px;
+}
+.hero-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.hero h1{
+  font-family:'Orbitron',sans-serif;font-weight:900;
+  font-size:clamp(2rem,5.5vw,3.5rem);line-height:1.12;margin-bottom:20px;letter-spacing:.5px;
+}
+.hero h1 .grad{
+  background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 0 40px rgba(181,55,242,.3);
+}
+.hero p.lead{color:var(--muted);font-size:1.1rem;max-width:520px;margin-bottom:32px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:16px}
+.btn{
+  font-family:'Space Grotesk';font-weight:600;font-size:1rem;padding:14px 28px;border-radius:14px;
+  cursor:pointer;transition:transform .2s,box-shadow .2s;display:inline-flex;align-items:center;gap:9px;border:none;
+}
+.btn-primary{
+  color:#04060f;background:linear-gradient(90deg,var(--cyan),var(--purple));
+  box-shadow:0 0 22px rgba(0,240,255,.5);background-size:200% 100%;animation:shift 4s linear infinite;
+}
+.btn-primary:hover{transform:translateY(-3px);box-shadow:0 0 34px rgba(0,240,255,.75)}
+.btn-ghost{color:var(--text);background:var(--glass);border:1px solid var(--glass-brd);backdrop-filter:blur(10px)}
+.btn-ghost:hover{transform:translateY(-3px);border-color:var(--cyan);box-shadow:0 0 20px rgba(0,240,255,.3)}
+.hero-stats{display:flex;gap:30px;margin-top:38px;flex-wrap:wrap}
+.hero-stats .stat b{font-family:'Orbitron';font-size:1.5rem;background:linear-gradient(90deg,var(--cyan),var(--pink));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero-stats .stat span{display:block;color:var(--muted);font-size:.82rem}
+
+/* generation visual */
+.gen-visual{
+  position:relative;aspect-ratio:1/1;max-width:440px;margin:0 auto;width:100%;
+  border-radius:24px;overflow:hidden;border:1px solid var(--glass-brd);
+  background:radial-gradient(circle at 50% 40%,rgba(20,24,48,.9),rgba(6,6,14,.95));
+  box-shadow:0 0 60px rgba(181,55,242,.25),inset 0 0 60px rgba(0,240,255,.06);
+}
+#gen-canvas{width:100%;height:100%;display:block}
+.gen-scanline{position:absolute;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);box-shadow:0 0 16px var(--cyan);top:0;animation:scan 3.2s linear infinite;opacity:.8}
+@keyframes scan{0%{top:0}100%{top:100%}}
+.gen-label{position:absolute;bottom:14px;left:14px;font-family:'Orbitron';font-size:.72rem;letter-spacing:1px;color:var(--cyan);background:rgba(4,6,15,.6);padding:5px 12px;border-radius:20px;border:1px solid rgba(0,240,255,.25)}
+.gen-corner{position:absolute;width:22px;height:22px;border:2px solid var(--cyan);opacity:.7}
+.gen-corner.tl{top:12px;left:12px;border-right:0;border-bottom:0}
+.gen-corner.tr{top:12px;right:12px;border-left:0;border-bottom:0}
+.gen-corner.bl{bottom:12px;left:12px;border-right:0;border-top:0}
+.gen-corner.br{bottom:12px;right:12px;border-left:0;border-top:0}
+
+/* ---------- reveal animation ---------- */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.visible{opacity:1;transform:none}
+.reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}.reveal.d4{transition-delay:.32s}
+
+/* ---------- glass card ---------- */
+.glass{
+  background:var(--glass);border:1px solid var(--glass-brd);border-radius:var(--radius);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  transition:transform .3s,border-color .3s,box-shadow .3s;position:relative;overflow:hidden;
+}
+.glass::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,rgba(0,240,255,.06),transparent 60%);opacity:0;transition:opacity .3s}
+.glass:hover{transform:translateY(-6px);border-color:rgba(0,240,255,.4);box-shadow:0 14px 44px rgba(0,0,0,.5),0 0 26px rgba(0,240,255,.18)}
+.glass:hover::before{opacity:1}
+
+/* ---------- FEATURES ---------- */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px}
+.feature-card{padding:28px 26px}
+.feature-icon{
+  width:58px;height:58px;border-radius:16px;display:grid;place-items:center;margin-bottom:16px;
+  background:linear-gradient(135deg,rgba(0,240,255,.14),rgba(181,55,242,.14));
+  border:1px solid rgba(0,240,255,.28);
+  box-shadow:0 0 20px rgba(0,240,255,.16),inset 0 0 16px rgba(181,55,242,.12);
+  transition:transform .3s,box-shadow .3s;
+}
+.feature-card:hover .feature-icon{transform:translateY(-2px) scale(1.06);box-shadow:0 0 28px rgba(0,240,255,.4),inset 0 0 18px rgba(181,55,242,.2)}
+.feature-icon svg{width:30px;height:30px;fill:none;stroke:url(#iconGrad);stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 5px rgba(0,240,255,.6))}
+.feature-card h3{font-family:'Orbitron';font-size:1.05rem;margin-bottom:8px;color:#fff}
+.feature-card p{color:var(--muted);font-size:.94rem}
+
+/* ---------- PRICING ---------- */
+.pricing-blocks{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:stretch}
+.price-card{padding:30px 28px;display:flex;flex-direction:column}
+.price-card .tag{font-family:'Orbitron';font-size:.72rem;letter-spacing:1.5px;color:var(--cyan);text-transform:uppercase;margin-bottom:6px}
+.price-card h3{font-family:'Orbitron';font-size:1.3rem;margin-bottom:18px;color:#fff}
+.price-card.featured{border-color:rgba(181,55,242,.55);box-shadow:0 0 34px rgba(181,55,242,.28)}
+.price-card.featured .tag{color:var(--pink)}
+.ribbon{position:absolute;top:16px;right:-34px;transform:rotate(45deg);background:linear-gradient(90deg,var(--purple),var(--pink));color:#fff;font-size:.66rem;font-weight:700;padding:5px 40px;letter-spacing:1px;box-shadow:0 4px 14px rgba(0,0,0,.4)}
+.big-price{font-family:'Orbitron';font-size:2.4rem;font-weight:900;color:#fff;margin-bottom:4px}
+.big-price small{font-size:.9rem;color:var(--muted);font-family:'Space Grotesk';font-weight:400}
+.price-table{width:100%;border-collapse:collapse;margin-top:8px}
+.price-table th,.price-table td{text-align:left;padding:11px 8px;border-bottom:1px solid rgba(120,140,255,.12);font-size:.92rem}
+.price-table th{color:var(--muted);font-weight:600;font-size:.78rem;text-transform:uppercase;letter-spacing:.5px}
+.price-table td b{color:var(--cyan)}
+.price-table tr:last-child td{border-bottom:none}
+.per{color:var(--pink);font-weight:600}
+
+.pay-methods{margin-top:44px}
+.pay-methods h3{text-align:center;font-family:'Orbitron';font-size:1.1rem;margin-bottom:22px;color:#fff}
+.pay-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center}
+.pay-chip{display:flex;align-items:center;gap:10px;padding:14px 22px;border-radius:14px;font-weight:500;font-size:.95rem}
+.pay-chip .ic{font-size:1.3rem}
+
+/* ---------- GET STARTED / timeline ---------- */
+.timeline{max-width:760px;margin:0 auto;position:relative}
+.timeline::before{content:"";position:absolute;left:26px;top:10px;bottom:10px;width:2px;background:linear-gradient(var(--cyan),var(--purple),var(--pink));box-shadow:0 0 12px rgba(0,240,255,.5)}
+.step{display:flex;gap:22px;margin-bottom:26px;align-items:flex-start;position:relative}
+.step-num{
+  flex:0 0 54px;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;
+  font-family:'Orbitron';font-weight:900;font-size:1.15rem;color:#04060f;z-index:2;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));box-shadow:0 0 20px rgba(0,240,255,.5);
+}
+.step-body{padding:16px 22px;flex:1}
+.step-body h4{font-family:'Orbitron';font-size:1rem;color:#fff;margin-bottom:4px}
+.step-body p{color:var(--muted);font-size:.93rem}
+.get-started-note{text-align:center;color:var(--muted);margin:34px auto 26px;max-width:560px;font-style:italic}
+.center-cta{text-align:center}
+
+/* ---------- FAQ ---------- */
+.faq-list{max-width:800px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.faq-item{padding:0;overflow:hidden}
+.faq-q{
+  width:100%;text-align:left;background:none;border:none;cursor:pointer;color:#fff;
+  font-family:'Space Grotesk';font-weight:600;font-size:1.02rem;padding:20px 24px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+}
+.faq-q .plus{flex:0 0 auto;width:24px;height:24px;position:relative;transition:transform .3s}
+.faq-q .plus::before,.faq-q .plus::after{content:"";position:absolute;background:var(--cyan);box-shadow:0 0 8px var(--cyan);border-radius:2px}
+.faq-q .plus::before{top:11px;left:2px;right:2px;height:2px}
+.faq-q .plus::after{left:11px;top:2px;bottom:2px;width:2px;transition:transform .3s}
+.faq-item.open .plus{transform:rotate(180deg)}
+.faq-item.open .plus::after{transform:scaleY(0)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .35s ease;color:var(--muted)}
+.faq-a p{padding:0 24px 22px;font-size:.95rem}
+.faq-item.open{border-color:rgba(0,240,255,.4)}
+
+/* ---------- SUPPORT ---------- */
+.support-card{max-width:760px;margin:0 auto;padding:44px 38px;text-align:center}
+.support-card p{color:var(--muted);margin-bottom:24px}
+.support-methods{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-top:8px}
+.support-methods .pay-chip{background:rgba(255,255,255,.03);border:1px dashed rgba(120,140,255,.25)}
+
+/* ---------- FOOTER ---------- */
+footer{border-top:1px solid rgba(120,140,255,.12);padding:54px 0 30px;position:relative;background:rgba(6,6,12,.6)}
+.footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:34px;margin-bottom:34px}
+.footer-brand .logo{font-size:1.4rem;margin-bottom:12px;display:inline-block}
+.footer-brand p{color:var(--muted);font-size:.9rem;max-width:280px}
+.footer-col h5{font-family:'Orbitron';font-size:.8rem;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);margin-bottom:14px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:9px}
+.footer-col a{color:var(--muted);font-size:.92rem;transition:color .2s}
+.footer-col a:hover{color:#fff}
+.footer-bottom{border-top:1px solid rgba(120,140,255,.1);padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:var(--muted);font-size:.85rem}
+
+/* ---------- mobile menu overlay ---------- */
+.mobile-nav{
+  position:fixed;inset:0;z-index:110;background:rgba(6,6,14,.97);backdrop-filter:blur(20px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+  transform:translateX(100%);transition:transform .4s cubic-bezier(.2,.7,.2,1);
+}
+.mobile-nav.open{transform:none}
+.mobile-nav a{font-family:'Orbitron';font-size:1.2rem;color:var(--text)}
+.mobile-nav a:hover{color:var(--cyan)}
+.mobile-nav .btn-bot{font-size:1rem;padding:12px 34px}
+
+@media(max-width:940px){
+  .hero-grid{grid-template-columns:1fr;gap:40px}
+  .gen-visual{max-width:360px}
+  .hero{text-align:center}
+  .hero p.lead{margin-left:auto;margin-right:auto}
+  .hero-cta,.hero-stats{justify-content:center}
+  .footer-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:820px){
+  .nav-links,.nav-right .btn-bot,.nav-right .lang-switch{display:none}
+  .nav-menu{gap:0}
+  .burger{display:flex}
+  .nav-right{gap:10px}
+  section{padding:70px 0}
+  .footer-grid{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+  .step{gap:14px}
+  .step-num{flex-basis:46px;width:46px;height:46px;font-size:1rem}
+  .timeline::before{left:22px}
+  .support-card{padding:32px 22px}
+  .hero-stats{gap:18px}
+}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="bg-gradient"></div>
+<canvas id="bg-canvas"></canvas>
+<div class="grid-overlay"></div>
+
+<!-- HEADER -->
+<header id="header">
+  <div class="container nav">
+    <div class="logo" data-text="Duology" onclick="scrollToId('#hero')">Duo<span>logy</span></div>
+    <div class="nav-menu">
+      <ul class="nav-links">
+        <li><a href="#features" data-ru="Возможности" data-en="Features">Возможности</a></li>
+        <li><a href="#pricing" data-ru="Тарифы" data-en="Pricing">Тарифы</a></li>
+        <li><a href="#get-started" data-ru="Подключение" data-en="Get started">Подключение</a></li>
+        <li><a href="#faq" data-ru="FAQ" data-en="FAQ">FAQ</a></li>
+      </ul>
+      <div class="nav-right">
+        <div class="lang-switch">
+          <button id="lng-ru" class="active" onclick="setLang('ru')">RU</button>
+          <button id="lng-en" onclick="setLang('en')">EN</button>
+        </div>
+        <a class="btn-bot" href="https://t.me/Duology_Bot" target="_blank" rel="noopener">BOT</a>
+        <button class="burger" id="burger" aria-label="Menu"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MOBILE NAV -->
+<nav class="mobile-nav" id="mobileNav">
+  <a href="#features" data-ru="Возможности" data-en="Features">Возможности</a>
+  <a href="#pricing" data-ru="Тарифы" data-en="Pricing">Тарифы</a>
+  <a href="#get-started" data-ru="Подключение" data-en="Get started">Подключение</a>
+  <a href="#faq" data-ru="FAQ" data-en="FAQ">FAQ</a>
+  <div class="lang-switch" style="display:flex">
+    <button class="active" id="m-lng-ru" onclick="setLang('ru')">RU</button>
+    <button id="m-lng-en" onclick="setLang('en')">EN</button>
+  </div>
+  <a class="btn-bot" href="https://t.me/Duology_Bot" target="_blank" rel="noopener">BOT</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="container hero-grid">
+    <div class="hero-text">
+      <span class="hero-badge reveal"><span class="dot"></span><span data-ru="Работает в Telegram · без установки" data-en="Runs in Telegram · no install">Работает в Telegram · без установки</span></span>
+      <h1 class="reveal d1"><span data-ru="Создавай образы с помощью " data-en="Create AI images ">Создавай образы с помощью </span><span class="grad" data-ru="ИИ за 30 секунд" data-en="in 30 seconds">ИИ за 30 секунд</span></h1>
+      <p class="lead reveal d2" data-ru="Загрузи фото, напиши промт — и получи готовый образ. Генерация и редактирование изображений на модели Nano Banana 2, прямо в Telegram." data-en="Upload a photo, write a prompt — and get a finished image. AI image generation and editing powered by the Nano Banana 2 model, right inside Telegram.">Загрузи фото, напиши промт — и получи готовый образ. Генерация и редактирование изображений на модели Nano Banana 2, прямо в Telegram.</p>
+      <div class="hero-cta reveal d3">
+        <a class="btn btn-primary" href="https://t.me/Duology_Bot" target="_blank" rel="noopener"><span data-ru="Попробовать бесплатно" data-en="Try for free">Попробовать бесплатно</span> →</a>
+        <a class="btn btn-ghost" href="#features"><span data-ru="Смотреть возможности" data-en="See features">Смотреть возможности</span></a>
+      </div>
+      <div class="hero-stats reveal d4">
+        <div class="stat"><b>10–30<small>с</small></b><span data-ru="на генерацию" data-en="per generation">на генерацию</span></div>
+        <div class="stat"><b>Nano Banana 2</b><span data-ru="модель ИИ" data-en="AI model">модель ИИ</span></div>
+        <div class="stat"><b>от 99₽</b><span data-ru="за образ" data-en="per image">за образ</span></div>
+      </div>
+    </div>
+    <div class="gen-visual reveal d2">
+      <canvas id="gen-canvas" width="440" height="440"></canvas>
+      <div class="gen-scanline"></div>
+      <div class="gen-corner tl"></div><div class="gen-corner tr"></div><div class="gen-corner bl"></div><div class="gen-corner br"></div>
+      <div class="gen-label">NANO BANANA 2 · <span data-ru="генерация…" data-en="generating…">генерация…</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <h2 class="section-title reveal" data-ru="Возможности" data-en="Features">Возможности</h2>
+    <p class="section-sub reveal d1" data-ru="Всё, что нужно для создания образов — в одном боте." data-en="Everything you need to create images — in one bot.">Всё, что нужно для создания образов — в одном боте.</p>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="iconGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00f0ff"/><stop offset=".5" stop-color="#b537f2"/><stop offset="1" stop-color="#ff2e93"/></linearGradient></defs></svg>
+    <div class="features-grid">
+      <div class="glass feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 14V4"/><path d="M8 8l4-4 4 4"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg></div><h3 data-ru="Просто загрузи фото" data-en="Just upload a photo">Просто загрузи фото</h3><p data-ru="Загружаешь фото, пишешь промт — получаешь результат." data-en="Upload a photo, write a prompt — get the result.">Загружаешь фото, пишешь промт — получаешь результат.</p></div>
+      <div class="glass feature-card reveal d1"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg></div><h3 data-ru="Скорость" data-en="Speed">Скорость</h3><p data-ru="10–30 секунд на генерацию образа." data-en="10–30 seconds per generation.">10–30 секунд на генерацию образа.</p></div>
+      <div class="glass feature-card reveal d2"><div class="feature-icon"><svg viewBox="0 0 24 24"><rect x="7" y="7" width="10" height="10" rx="2.2"/><path d="M10 3v3M14 3v3M10 18v3M14 18v3M3 10h3M3 14h3M18 10h3M18 14h3"/></svg></div><h3 data-ru="Модель" data-en="Model">Модель</h3><p data-ru="Работает на Nano Banana 2 — новейшей модели генерации." data-en="Powered by Nano Banana 2 — the latest generation model.">Работает на Nano Banana 2 — новейшей модели генерации.</p></div>
+      <div class="glass feature-card reveal"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div><h3 data-ru="Безопасность" data-en="Safety">Безопасность</h3><p data-ru="NSFW-фильтр и запрет на образы известных людей." data-en="NSFW filter and no images of real public people.">NSFW-фильтр и запрет на образы известных людей.</p></div>
+      <div class="glass feature-card reveal d1"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/><path d="M10 11v6M14 11v6"/></svg></div><h3 data-ru="Хранение фото" data-en="Photo storage">Хранение фото</h3><p data-ru="Отсутствует. Фото не сохраняются на серверах." data-en="None. Photos are not stored on servers.">Отсутствует. Фото не сохраняются на серверах.</p></div>
+      <div class="glass feature-card reveal d2"><div class="feature-icon"><svg viewBox="0 0 24 24"><path d="M4 5h16a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H9l-4 4V6a1 1 0 0 1 1-1z"/><path d="M8 10h8M8 13h5"/></svg></div><h3 data-ru="Поддержка" data-en="Support">Поддержка</h3><p data-ru="Ответ в течение 1 часа." data-en="Reply within 1 hour.">Ответ в течение 1 часа.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <h2 class="section-title reveal" data-ru="Тарифы" data-en="Pricing">Тарифы</h2>
+    <p class="section-sub reveal d1" data-ru="Плати разово или подключай пакеты и подписки — так выгоднее." data-en="Pay per image or choose bundles and subscriptions — the more you take, the less you pay.">Плати разово или подключай пакеты и подписки — так выгоднее.</p>
+    <div class="pricing-blocks">
+      <!-- one-off -->
+      <div class="glass price-card reveal">
+        <div class="tag" data-ru="Разово" data-en="One-off">Разово</div>
+        <h3 data-ru="Разовые генерации" data-en="Single generations">Разовые генерации</h3>
+        <div class="big-price">99₽ <small data-ru="/ 1 образ" data-en="/ 1 image">/ 1 образ</small></div>
+        <p style="color:var(--muted);font-size:.93rem;margin-top:10px" data-ru="Идеально, чтобы попробовать без обязательств." data-en="Perfect to try without commitment.">Идеально, чтобы попробовать без обязательств.</p>
+        <a class="btn btn-ghost" style="margin-top:auto" href="https://t.me/Duology_Bot" target="_blank" rel="noopener"><span data-ru="Создать образ" data-en="Create image">Создать образ</span></a>
+      </div>
+      <!-- bundles -->
+      <div class="glass price-card featured reveal d1">
+        <div class="ribbon" data-ru="Выгодно" data-en="Save">Выгодно</div>
+        <div class="tag" data-ru="Пакеты" data-en="Bundles">Пакеты</div>
+        <h3 data-ru="Пакеты образов" data-en="Image bundles">Пакеты образов</h3>
+        <table class="price-table">
+          <thead><tr><th data-ru="Пакет" data-en="Bundle">Пакет</th><th data-ru="Цена" data-en="Price">Цена</th></tr></thead>
+          <tbody>
+            <tr><td data-ru="10 образов" data-en="10 images">10 образов</td><td><b>199₽</b></td></tr>
+            <tr><td data-ru="30 образов" data-en="30 images">30 образов</td><td><b>499₽</b></td></tr>
+            <tr><td data-ru="70 образов" data-en="70 images">70 образов</td><td><b>1299₽</b></td></tr>
+          </tbody>
+        </table>
+        <a class="btn btn-primary" style="margin-top:22px" href="https://t.me/Duology_Bot" target="_blank" rel="noopener"><span data-ru="Взять пакет" data-en="Get a bundle">Взять пакет</span> →</a>
+      </div>
+      <!-- subscriptions -->
+      <div class="glass price-card reveal d2">
+        <div class="tag" data-ru="Подписки" data-en="Subscriptions">Подписки</div>
+        <h3 data-ru="Подписки" data-en="Subscriptions">Подписки</h3>
+        <table class="price-table">
+          <thead><tr><th data-ru="Тариф" data-en="Plan">Тариф</th><th data-ru="Цена/мес" data-en="Price/mo">Цена/мес</th><th data-ru="Образов" data-en="Images">Образов</th></tr></thead>
+          <tbody>
+            <tr><td data-ru="Базовая" data-en="Basic">Базовая</td><td><b>499₽</b></td><td>50</td></tr>
+            <tr><td data-ru="Премиум" data-en="Premium">Премиум</td><td><b>1499₽</b></td><td>200</td></tr>
+            <tr><td>VIP</td><td><b>3999₽</b></td><td data-ru="10/день" data-en="10/day">10/день</td></tr>
+          </tbody>
+        </table>
+        <a class="btn btn-ghost" style="margin-top:22px" href="https://t.me/Duology_Bot" target="_blank" rel="noopener"><span data-ru="Оформить подписку" data-en="Subscribe">Оформить подписку</span></a>
+      </div>
+    </div>
+
+    <div class="pay-methods reveal d1">
+      <h3 data-ru="Способы оплаты" data-en="Payment methods">Способы оплаты</h3>
+      <div class="pay-grid">
+        <div class="glass pay-chip"><span class="ic">⭐️</span> Telegram Stars</div>
+        <div class="glass pay-chip"><span class="ic">💳</span> Platega.io <span style="color:var(--muted)" data-ru="(карты РФ, СБП, SberPay)" data-en="(RU cards, SBP, SberPay)">(карты РФ, СБП, SberPay)</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GET STARTED -->
+<section id="get-started">
+  <div class="container">
+    <h2 class="section-title reveal" data-ru="Подключение" data-en="Get started">Подключение</h2>
+    <p class="section-sub reveal d1" data-ru="Шесть шагов от старта до готового образа." data-en="Six steps from start to a finished image.">Шесть шагов от старта до готового образа.</p>
+    <div class="timeline">
+      <div class="step reveal"><div class="step-num">1</div><div class="glass step-body"><h4 data-ru="Открой @DuologyBot" data-en="Open @DuologyBot">Открой @DuologyBot</h4><p data-ru="Найди бота в Telegram." data-en="Find the bot in Telegram.">Найди бота в Telegram.</p></div></div>
+      <div class="step reveal d1"><div class="step-num">2</div><div class="glass step-body"><h4 data-ru="Нажми Start" data-en="Press Start">Нажми Start</h4><p data-ru="Запусти бота одной кнопкой." data-en="Launch the bot with one tap.">Запусти бота одной кнопкой.</p></div></div>
+      <div class="step reveal d2"><div class="step-num">3</div><div class="glass step-body"><h4 data-ru="Получи 1 бесплатную генерацию" data-en="Get 1 free generation">Получи 1 бесплатную генерацию</h4><p data-ru="Первый образ — за наш счёт." data-en="Your first image is on us.">Первый образ — за наш счёт.</p></div></div>
+      <div class="step reveal"><div class="step-num">4</div><div class="glass step-body"><h4 data-ru="Загрузи фото лица" data-en="Upload a face photo">Загрузи фото лица</h4><p data-ru="Одно чёткое фото — этого достаточно." data-en="One clear photo is enough.">Одно чёткое фото — этого достаточно.</p></div></div>
+      <div class="step reveal d1"><div class="step-num">5</div><div class="glass step-body"><h4 data-ru="Напиши промпт" data-en="Write a prompt">Напиши промпт</h4><p data-ru="Опиши идею словами." data-en="Describe your idea in words.">Опиши идею словами.</p></div></div>
+      <div class="step reveal d2"><div class="step-num">6</div><div class="glass step-body"><h4 data-ru="Получи готовый образ за 30 секунд" data-en="Get the result in 30 seconds">Получи готовый образ за 30 секунд</h4><p data-ru="Скачивай и делись." data-en="Download and share.">Скачивай и делись.</p></div></div>
+    </div>
+    <p class="get-started-note reveal" data-ru="Ничего устанавливать не нужно — работает прямо в Telegram." data-en="No installation needed — works directly in Telegram.">Ничего устанавливать не нужно — работает прямо в Telegram.</p>
+    <div class="center-cta reveal d1">
+      <a class="btn btn-primary" href="https://t.me/Duology_Bot" target="_blank" rel="noopener"><span data-ru="Запустить бота" data-en="Launch the bot">Запустить бота</span> →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <h2 class="section-title reveal" data-ru="Частые вопросы" data-en="FAQ">Частые вопросы</h2>
+    <p class="section-sub reveal d1" data-ru="Коротко о главном." data-en="The essentials, briefly.">Коротко о главном.</p>
+    <div class="faq-list">
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Сколько стоит?" data-en="How much does it cost?">Сколько стоит?</span><span class="plus"></span></button><div class="faq-a"><p data-ru="От 99₽ за 1 образ. Пакет из 10 — 199₽, подписка от 499₽/мес." data-en="From 99₽ per image. Bundle of 10 — 199₽, subscription from 499₽/month.">От 99₽ за 1 образ. Пакет из 10 — 199₽, подписка от 499₽/мес.</p></div></div>
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Как быстро делается образ?" data-en="How fast is generation?">Как быстро делается образ?</span><span class="plus"></span></button><div class="faq-a"><p data-ru="10–30 секунд." data-en="10–30 seconds.">10–30 секунд.</p></div></div>
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Что если результат не понравился?" data-en="What if I don't like the result?">Что если результат не понравился?</span><span class="plus"></span></button><div class="faq-a"><p data-ru="Переделаем бесплатно + дадим 1 бонусную генерацию. Или вернём деньги. Бесплатные генерации можно переделать только 1 раз." data-en="We'll redo it for free + give 1 bonus generation. Or refund. Free generations can only be redone once.">Переделаем бесплатно + дадим 1 бонусную генерацию. Или вернём деньги. Бесплатные генерации можно переделать только 1 раз.</p></div></div>
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Куда сохраняются мои фото?" data-en="Where are my photos stored?">Куда сохраняются мои фото?</span><span class="plus"></span></button><div class="faq-a"><p data-ru="Фото не сохраняются. Не передаём третьим лицам." data-en="Photos are not stored. We don't share them with third parties.">Фото не сохраняются. Не передаём третьим лицам.</p></div></div>
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Можно создать образ известного человека?" data-en="Can I create an image of a celebrity?">Можно создать образ известного человека?</span><span class="plus"></span></button><div class="faq-a"><p data-ru="Нет, это запрещено." data-en="No, it's prohibited.">Нет, это запрещено.</p></div></div>
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Есть ограничения?" data-en="Are there limits?">Есть ограничения?</span><span class="plus"></span></button><div class="faq-a"><p data-ru="Для VIP — до 10 в день без лимита на месяц." data-en="For VIP — up to 10 per day, no monthly limit.">Для VIP — до 10 в день без лимита на месяц.</p></div></div>
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Как отменить подписку?" data-en="How to cancel subscription?">Как отменить подписку?</span><span class="plus"></span></button><div class="faq-a"><p data-ru='В Личном кабинете → «Управление подпиской» → «Отменить». Доступ сохранится до конца оплаченного периода.' data-en='In Personal account → "Manage subscription" → "Cancel". Access remains until the end of the paid period.'>В Личном кабинете → «Управление подпиской» → «Отменить». Доступ сохранится до конца оплаченного периода.</p></div></div>
+      <div class="glass faq-item reveal"><button class="faq-q"><span data-ru="Как связаться с поддержкой?" data-en="How to contact support?">Как связаться с поддержкой?</span><span class="plus"></span></button><div class="faq-a"><p data-ru='В боте кнопка «Поддержка» — ответим в течение часа.' data-en='In the bot, press the "Support" button — we\'ll reply within an hour.'>В боте кнопка «Поддержка» — ответим в течение часа.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="logo" data-text="Duology">Duo<span>logy</span></div>
+        <p data-ru="ИИ-генерация и редактирование изображений в Telegram. Модель Nano Banana 2." data-en="AI image generation and editing in Telegram. Powered by Nano Banana 2.">ИИ-генерация и редактирование изображений в Telegram. Модель Nano Banana 2.</p>
+      </div>
+      <div class="footer-col">
+        <h5 data-ru="Разделы" data-en="Sections">Разделы</h5>
+        <ul>
+          <li><a href="#features" data-ru="Возможности" data-en="Features">Возможности</a></li>
+          <li><a href="#pricing" data-ru="Тарифы" data-en="Pricing">Тарифы</a></li>
+          <li><a href="#get-started" data-ru="Подключение" data-en="Get started">Подключение</a></li>
+          <li><a href="#faq" data-ru="FAQ" data-en="FAQ">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5 data-ru="Ссылки" data-en="Links">Ссылки</h5>
+        <ul>
+          <li><a href="https://t.me/Duology_Bot" target="_blank" rel="noopener">Telegram · @Duology_Bot</a></li>
+          <li><a href="https://t.me/DuologySupport" target="_blank" rel="noopener" data-ru="Поддержка · @DuologySupport" data-en="Support · @DuologySupport">Поддержка · @DuologySupport</a></li>
+          <li><a href="https://docs.duologylawyerai.com" target="_blank" rel="noopener" data-ru="Документы" data-en="Documents">Документы</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Duology</span>
+      <span data-ru="Работает на Nano Banana 2" data-en="Powered by Nano Banana 2">Работает на Nano Banana 2</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ---------- language ---------- */
+function setLang(lang){
+  document.documentElement.lang=lang;
+  document.querySelectorAll('[data-ru]').forEach(el=>{
+    const v=el.getAttribute('data-'+lang);
+    if(v!==null) el.textContent=v;
+  });
+  document.getElementById('lng-ru').classList.toggle('active',lang==='ru');
+  document.getElementById('lng-en').classList.toggle('active',lang==='en');
+  const mru=document.getElementById('m-lng-ru'),men=document.getElementById('m-lng-en');
+  if(mru)mru.classList.toggle('active',lang==='ru');
+  if(men)men.classList.toggle('active',lang==='en');
+  try{localStorage.setItem('duology-lang',lang)}catch(e){}
+}
+(function(){
+  let saved='ru';
+  try{saved=localStorage.getItem('duology-lang')||'ru'}catch(e){}
+  if(saved==='en') setLang('en');
+})();
+
+/* ---------- smooth scroll helper ---------- */
+function scrollToId(id){
+  const el=document.querySelector(id);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+}
+
+/* ---------- header shadow on scroll ---------- */
+const header=document.getElementById('header');
+window.addEventListener('scroll',()=>{
+  header.classList.toggle('scrolled',window.scrollY>20);
+});
+
+/* ---------- burger / mobile nav ---------- */
+const burger=document.getElementById('burger');
+const mobileNav=document.getElementById('mobileNav');
+burger.addEventListener('click',()=>{
+  const open=mobileNav.classList.toggle('open');
+  burger.classList.toggle('open',open);
+  document.body.style.overflow=open?'hidden':'';
+});
+mobileNav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{
+  mobileNav.classList.remove('open');burger.classList.remove('open');document.body.style.overflow='';
+}));
+
+/* ---------- anchor smooth scroll ---------- */
+document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    const id=a.getAttribute('href');
+    if(id.length>1){e.preventDefault();scrollToId(id);}
+  });
+});
+
+/* ---------- FAQ accordion ---------- */
+document.querySelectorAll('.faq-item').forEach(item=>{
+  const q=item.querySelector('.faq-q');
+  const a=item.querySelector('.faq-a');
+  q.addEventListener('click',()=>{
+    const open=item.classList.contains('open');
+    document.querySelectorAll('.faq-item').forEach(o=>{o.classList.remove('open');o.querySelector('.faq-a').style.maxHeight=null;});
+    if(!open){item.classList.add('open');a.style.maxHeight=a.scrollHeight+'px';}
+  });
+});
+
+/* ---------- scroll reveal (Intersection Observer) ---------- */
+const io=new IntersectionObserver((entries)=>{
+  entries.forEach(en=>{
+    if(en.isIntersecting){en.target.classList.add('visible');io.unobserve(en.target);}
+  });
+},{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ---------- animated network background ---------- */
+(function(){
+  const c=document.getElementById('bg-canvas');const ctx=c.getContext('2d');
+  let w,h,dpr,nodes=[];const COUNT=window.innerWidth<600?32:64;
+  function resize(){dpr=Math.min(window.devicePixelRatio||1,2);w=c.width=innerWidth*dpr;h=c.height=innerHeight*dpr;c.style.width=innerWidth+'px';c.style.height=innerHeight+'px';}
+  function init(){nodes=[];for(let i=0;i<COUNT;i++){nodes.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25*dpr,vy:(Math.random()-.5)*.25*dpr});}}
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    for(const n of nodes){n.x+=n.vx;n.y+=n.vy;if(n.x<0||n.x>w)n.vx*=-1;if(n.y<0||n.y>h)n.vy*=-1;}
+    const R=140*dpr;
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j];const dx=a.x-b.x,dy=a.y-b.y;const d=Math.hypot(dx,dy);
+        if(d<R){const o=(1-d/R)*.35;ctx.strokeStyle='rgba(0,240,255,'+o+')';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
+      }
+    }
+    for(const n of nodes){ctx.beginPath();ctx.fillStyle='rgba(181,55,242,.8)';ctx.arc(n.x,n.y,1.6*dpr,0,6.283);ctx.fill();}
+    requestAnimationFrame(draw);
+  }
+  resize();init();draw();
+  addEventListener('resize',()=>{resize();init();});
+})();
+
+/* ---------- hero "image generation" noise-to-image effect ---------- */
+(function(){
+  const c=document.getElementById('gen-canvas');if(!c)return;const ctx=c.getContext('2d');
+  const W=c.width,H=c.height;const CELL=11;const cols=Math.ceil(W/CELL),rows=Math.ceil(H/CELL);
+  // target "image": a glowing gradient portrait-ish silhouette
+  function target(x,y){
+    const cx=cols/2,cy=rows*0.42;const dx=(x-cx)/cols,dy=(y-cy)/rows;
+    const head=Math.exp(-((dx*dx)/0.03+(dy*dy)/0.05));
+    const body=Math.exp(-((dx*dx)/0.10))*Math.max(0,(y-rows*0.6)/rows)*1.6;
+    const v=Math.min(1,head+body*0.7);
+    return v;
+  }
+  const palette=[[0,240,255],[181,55,242],[255,46,147]];
+  let progress=0;
+  function frame(){
+    progress+=0.010;if(progress>1.35)progress=0; // loop the "generation"
+    const p=Math.min(1,progress);
+    ctx.fillStyle='rgba(6,6,14,'+(0.35)+')';ctx.fillRect(0,0,W,H);
+    for(let y=0;y<rows;y++){
+      for(let x=0;x<cols;x++){
+        const settle=(x*0.6+y*1.3)/(cols*0.6+rows*1.3); // reveal order
+        const revealed=p>settle;
+        const t=target(x,y);
+        let col,alpha;
+        if(!revealed){
+          // noise pixel
+          const n=Math.random();
+          const pc=palette[(Math.random()*3)|0];
+          col=pc;alpha=n*0.5*(0.3+t);
+        }else{
+          const mix=palette[0].map((_,k)=>Math.round(palette[0][k]*(1-t)+palette[1][k]*t*0.7+palette[2][k]*t*0.3));
+          col=mix;alpha=0.15+t*0.85;
+        }
+        if(alpha<0.03)continue;
+        ctx.fillStyle='rgba('+col[0]+','+col[1]+','+col[2]+','+alpha+')';
+        ctx.fillRect(x*CELL,y*CELL,CELL-1,CELL-1);
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+})();
+</script>
+</body>
+</html>
